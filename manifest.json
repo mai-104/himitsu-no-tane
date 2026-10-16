@@ -1,7 +1,7 @@
 {
-  "id": "/himitsu-garden/",
-  "name": "ひみつのお庭と宝島",
-  "short_name": "お庭と宝島",
+  "id": "/himitsu-no-tane/",
+  "name": "秘密の種と宝探し",
+  "short_name": "秘密の種",
   "description": "お花畑と宝島で遊ぶ、やさしい数字パズル",
   "start_url": "./index.html",
   "scope": "./",
