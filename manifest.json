@@ -1,0 +1,19 @@
+{
+  "id": "himitsu-garden-v2",
+  "name": "ひみつのお庭と宝島",
+  "short_name": "お庭と宝島",
+  "description": "お花畑と宝島で遊ぶ、やさしい数字パズル",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff3e8",
+  "theme_color": "#fff3e8",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
