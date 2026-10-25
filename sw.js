@@ -1,6 +1,6 @@
 // 秘密の種と宝探し: オンラインでもオフラインでも遊べるようにするサービスワーカー
 // ファイルを更新したら、下の CACHE の数字を変えると端末に確実に反映されます
-const CACHE = "hsg-v4";
+const CACHE = "hsg-v5";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
