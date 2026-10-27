@@ -132,7 +132,7 @@ h1{margin:0;font-size:clamp(21px,6.2vw,28px);font-weight:900;letter-spacing:.02e
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
   transition:background-color .7s ease,transform .12s ease;
 }
-.cell:focus-visible,.next:focus-visible,.ibtn:focus-visible,.how summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.cell:focus-visible,.next:focus-visible,.ibtn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .cell:focus-visible{z-index:3}
 .g{position:relative;display:block;pointer-events:none}
 .mk{position:absolute;left:24%;top:24%;width:52%;height:52%;fill:none;stroke:var(--cross);stroke-width:3.2;stroke-linecap:round;opacity:.5;pointer-events:none;overflow:visible}
@@ -210,6 +210,7 @@ h1{margin:0;font-size:clamp(21px,6.2vw,28px);font-weight:900;letter-spacing:.02e
   box-shadow:0 10px 26px var(--panel-glow);
   animation:panel .7s cubic-bezier(.2,1.2,.4,1) .9s backwards;
 }
+.clear[hidden]{display:none}
 .clear p{margin:0;font-weight:700;font-size:15px;line-height:1.5}
 .next{
   appearance:none;-webkit-appearance:none;font:inherit;font-size:18px;font-weight:900;color:var(--next-ink);
@@ -219,11 +220,18 @@ h1{margin:0;font-size:clamp(21px,6.2vw,28px);font-weight:900;letter-spacing:.02e
 .next:active{transform:translateY(2px);box-shadow:0 2px 0 var(--next-edge)}
 @keyframes panel{from{transform:translateY(16px) scale(.94);opacity:0}to{transform:none;opacity:1}}
 
-.how{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:0 14px;font-size:14px;line-height:1.65}
-.how summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:900;padding:12px 0;list-style:none}
-.how summary::-webkit-details-marker{display:none}
-.how summary::after{content:"＋";color:var(--ink-soft)}
-.how[open] summary::after{content:"－"}
+.tog{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tog button{
+  appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-weight:900;color:var(--ink);
+  background:var(--card);border:2px solid var(--line);border-radius:16px;min-height:52px;padding:0 10px;
+  display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+}
+.tog button::after{content:"＋";color:var(--ink-soft)}
+.tog button[aria-expanded="true"]{border-color:var(--next-edge)}
+.tog button[aria-expanded="true"]::after{content:"－"}
+.tog button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.how{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 14px 0;font-size:14px;line-height:1.65}
+.how[hidden]{display:none}
 .how ul{margin:0 0 12px;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
 
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:12px}
@@ -377,13 +385,16 @@ h1{margin:0;font-size:clamp(21px,6.2vw,28px);font-weight:900;letter-spacing:.02e
       <button class="next alt sm" id="clear-stamps" type="button" hidden>🎫 スタンプカードを見る</button>
     </section>
 
-    <details class="how">
-      <summary>あそびかた</summary>
-      <ul id="how-list"></ul>
-    </details>
+    <div class="tog">
+      <button type="button" id="tg-how" aria-expanded="false" aria-controls="pn-how">あそびかた</button>
+      <button type="button" id="tg-bgm" aria-expanded="false" aria-controls="pn-bgm">BGMの音色</button>
+    </div>
 
-    <details class="how">
-      <summary>BGMの音色</summary>
+    <div class="how" id="pn-how" hidden>
+      <ul id="how-list"></ul>
+    </div>
+
+    <div class="how" id="pn-bgm" hidden>
       <div class="seg" id="seg" role="radiogroup" aria-label="BGMの音色">
         <button type="button" role="radio" data-v="auto" aria-checked="true">おまかせ（指定の音）</button>
         <button type="button" role="radio" data-v="musicbox" aria-checked="true">オルゴール</button>
@@ -391,7 +402,7 @@ h1{margin:0;font-size:clamp(21px,6.2vw,28px);font-weight:900;letter-spacing:.02e
         <button type="button" role="radio" data-v="harp" aria-checked="false">ハープ</button>
         <button type="button" role="radio" data-v="marimba" aria-checked="false">マリンバ</button>
       </div>
-    </details>
+    </div>
   </div>
 
   <!-- ===== stamp card ===== -->
@@ -1496,6 +1507,7 @@ h1{margin:0;font-size:clamp(21px,6.2vw,28px);font-weight:900;letter-spacing:.02e
   btnSe.addEventListener('click', function () { Sound.setSe(!Sound.on.se); syncSoundButtons(); });
 
   nextBtn.addEventListener('click', function () {
+    if (!G.cleared) return; /* クリア前は進めない（ステージ飛ばし防止） */
     if (G.stage >= STAGES.length - 1) {
       newRun();
     } else {
@@ -1516,6 +1528,17 @@ h1{margin:0;font-size:clamp(21px,6.2vw,28px);font-weight:900;letter-spacing:.02e
     say('もう一度 ↻ をタップすると、このステージをやりなおすよ。');
     armTimer = setTimeout(disarm, 3500);
   });
+
+  /* あそびかた / BGMの音色：横並びのボタンで、下のパネルをひとつだけ開く */
+  var tgHow = $('tg-how'), tgBgm = $('tg-bgm'), pnHow = $('pn-how'), pnBgm = $('pn-bgm');
+  function openPanel(which) {
+    pnHow.hidden = which !== 'how';
+    pnBgm.hidden = which !== 'bgm';
+    tgHow.setAttribute('aria-expanded', String(which === 'how'));
+    tgBgm.setAttribute('aria-expanded', String(which === 'bgm'));
+  }
+  tgHow.addEventListener('click', function () { openPanel(pnHow.hidden ? 'how' : ''); });
+  tgBgm.addEventListener('click', function () { openPanel(pnBgm.hidden ? 'bgm' : ''); });
 
   var segEl = $('seg');
   function syncSeg() {
